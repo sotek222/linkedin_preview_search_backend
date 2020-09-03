@@ -3,3 +3,6 @@
 
 # ignores package-lock 
 package-lock.json
+
+# ignore .env to protect Keys
+.env
