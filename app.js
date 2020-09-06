@@ -1,5 +1,7 @@
 // Importing the express package
 const express = require('express');
+
+// Importing middlewares 
 const bodyParser = require('body-parser');
 const cors = require('cors')
 

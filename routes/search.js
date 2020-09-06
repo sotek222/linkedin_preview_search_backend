@@ -1,12 +1,11 @@
+// Imports the controlloer function
 const { findLinkedinPreview } = require('../controllers/search');
 
+// Imports the Router module and invokes it
 const Router = require('express').Router();
 
-Router.get('/test-search', (req, resp, _) => {
-  resp.status(200).send('Success');
-  resp.end();
-});
-
+// Calls the post method which requires both a route and an 
+// action in the form of a callback function 
 Router.post('/search', findLinkedinPreview);
 
 module.exports = Router;
