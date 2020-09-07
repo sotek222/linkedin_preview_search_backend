@@ -27,7 +27,7 @@ const MOCK_GOOGLE_RESPONSE = {
   }]
 };
 
-describe('application', function () {
+describe('fetching data for application', () => {
   const noop = () => { };
 
   const responseMock = {
