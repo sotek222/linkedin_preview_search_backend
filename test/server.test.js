@@ -1,5 +1,6 @@
-const expect = require('chai').expect;
-const BASE_URL = "http://localhost:3001/";
+const { expect } = require('chai');
+const fetch = require('node-fetch');
+const sinon = require("sinon");
 const findLinkedinPreview = require('../controllers/search');
 
 const MOCK_GOOGLE_RESPONSE = {
@@ -26,29 +27,50 @@ const MOCK_GOOGLE_RESPONSE = {
   }]
 };
 
-const fetchDataMock = () => {
-  return Promise.resolve(MOCK_GOOGLE_RESPONSE);
-};
+describe('application', function () {
+  const noop = () => { };
 
-const requestMock = () => {
-  return {
+  const responseMock = {
+    json: sinon.spy(),
+    status: sinon.spy(),
+    send: noop,
+    end: noop
+  };
+
+  const requestMock = {
     body: {
       url: "https://www.linkedin.com/in/matthew-masiello"
     }
-  }
-};
+  };
 
-const responseMock = () => {
-  const noop = () => { };
-  return {
-    json: noop,
-    end: noop
-  }
-}
+  const fetchMock = sinon.stub(fetch, 'Promise').returns(Promise.resolve(MOCK_GOOGLE_RESPONSE));
 
+  afterEach(function () {
+    fetchMock.restore();
+  });
 
-describe('application', () => {
-  it('handles fetch data correctly', done => {
-    findLinkedinPreview(requestMock, responseMock, fetchDataMock)
+  it('handles fetch data correctly by sending a request to Google and receiving a JSON response', async () => {
+    await findLinkedinPreview(requestMock, responseMock, fetchMock);
+    expect(responseMock.json.calledOnce).to.be.true;
+  });
+
+  it('prepares the data and sends it as an object', async () => {
+    await findLinkedinPreview(requestMock, responseMock, fetchMock);
+    const jsonData = responseMock.json.firstCall.args[0];
+    expect(jsonData).to.be.an('object');
+  });
+
+  it('sends the data as a JSONified object with the correct properties', async () => {
+    await findLinkedinPreview(requestMock, responseMock, fetchMock);
+    const jsonData = responseMock.json.firstCall.args[0];
+    expect(jsonData.title).to.be.a('string');
+    expect(jsonData.link).to.be.a('string');
+    expect(jsonData.snippet).to.be.a('string');
+  });
+
+  it('handles a bad response from the google api', async () => {
+    const badFetchMock = sinon.stub(fetch, 'Promise').returns(Promise.resolve({}));
+    await findLinkedinPreview(requestMock, responseMock, badFetchMock);
+    sinon.assert.calledWith(responseMock.status, 404);
   });
 });

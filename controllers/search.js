@@ -22,10 +22,13 @@ const fetchData = (linkedinUrl) => {
  * @param {Object} req  - an object containing all data sent with the request from the client
  * @param {Object} resp - an object representing a response object. It can be used to send data to a client
  */
-const findLinkedinPreview = (req, resp) => {
+const findLinkedinPreview = (req, resp, fetchMock = null) => {
+  // For use with test we check if a mocked fetch is being passed in
+  // if is not we use the fetch function above
+  const fetchFunction = fetchMock ? fetchMock : fetchData;
   // pull the url out of the request body
   const linkedinUrl = req.body.url;
-  fetchData(linkedinUrl)
+  fetchFunction(linkedinUrl)
     .then(searchResult => {
       // if we fail to pull any results we land in the catch block
       try {
@@ -41,13 +44,12 @@ const findLinkedinPreview = (req, resp) => {
         // This will only occur if the items property is none existant 
         // we want to send a 404 status code to the client so it can 
         // hendle the error on that end
-        resp.status(404).send("No Search Reults found");
+        resp.status(404)
+        resp.send("No Search Reults found");
         resp.end();
       }
     })
     .catch(err => console.log("THERE WAS AN ERROR FETCHING FROM GOOGLE: ", err));
 };
 
-module.exports = {
-  findLinkedinPreview
-}
+module.exports = findLinkedinPreview;
